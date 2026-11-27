@@ -8,6 +8,18 @@ document.getElementById("closePost")?.addEventListener("click", () => (modal.hid
 modal?.addEventListener("click", (e) => { if (e.target === modal) modal.hidden = true; });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal) modal.hidden = true; });
 
+// ===== ログインしていないときの「ログインが必要です」 =====
+const loginModal = document.getElementById("loginModal");
+function showLoginNotice(title) {
+  if (!loginModal) return;
+  document.getElementById("loginModalTitle").textContent = title;
+  loginModal.hidden = false;
+}
+document.getElementById("openLoginNotice")?.addEventListener("click", () => showLoginNotice("投稿にはログインが必要です"));
+document.getElementById("closeLoginNotice")?.addEventListener("click", () => (loginModal.hidden = true));
+loginModal?.addEventListener("click", (e) => { if (e.target === loginModal) loginModal.hidden = true; });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && loginModal) loginModal.hidden = true; });
+
 // ===== マイページのタブ切り替え =====
 document.querySelectorAll(".tabs[data-switch] a").forEach((tab) => {
   tab.addEventListener("click", (e) => {
@@ -91,7 +103,7 @@ let combo = 0, comboTimer;
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".dopa");
   if (!btn) return;
-  if (!window.LOGGED_IN) { location.href = "/login?next=" + encodeURIComponent(location.pathname); return; }
+  if (!window.LOGGED_IN) { showLoginNotice("ドーパミンを送るにはログインが必要です"); return; }
   if (btn.disabled) return;
   btn.disabled = true;
   try {

@@ -50,6 +50,19 @@
       </div>
     </form>
   </div>
+  {% else %}
+  <!-- ログインしていないとき：＋ を押すと「ログインが必要です」を出す -->
+  <button class="fab" id="openLoginNotice" aria-label="投稿する">＋</button>
+  <div class="modal" id="loginModal" hidden>
+    <div class="modal-box notice">
+      <div class="notice-icon">🔒</div>
+      <h2 id="loginModalTitle">投稿にはログインが必要です</h2>
+      <p>ログインすると、投稿したりドーパミンを送ったりできるよ！</p>
+      <a class="btn" href="{{ url_for('login', next=request.path) }}">ログイン</a>
+      <a class="btn ghost" href="{{ url_for('signup') }}">新規登録（はじめての人）</a>
+      <button type="button" class="link" id="closeLoginNotice">あとで</button>
+    </div>
+  </div>
   {% endif %}
 
   <script>window.LOGGED_IN = {{ 'true' if me else 'false' }};</script>

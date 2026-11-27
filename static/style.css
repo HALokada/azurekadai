@@ -120,6 +120,16 @@ textarea { resize: vertical; }
 .file input { margin-top: 6px; }
 .modal-actions { display: flex; justify-content: flex-end; align-items: center; gap: 16px; }
 
+/* ログインが必要です */
+.login-banner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin: 16px 20px 0; padding: 12px 16px; border-radius: 12px;
+  background: #1f1428; border: 1px solid var(--hot); }
+.login-banner .btn { margin-left: auto; }
+.notice { align-items: center; text-align: center; }
+.notice p { margin: 0; color: var(--sub); }
+.notice .btn { width: 100%; text-align: center; }
+.notice-icon { font-size: 44px; }
+
 /* スマホ */
 @media (max-width: 700px) {
   .side { width: 64px; padding: 16px 8px; align-items: center; }

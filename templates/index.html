@@ -5,6 +5,13 @@
   <a class="{% if tab == 'following' %}active{% endif %}" href="{{ url_for('index', tab='following') }}">フォロワー投稿</a>
   <a class="{% if tab == 'recommend' %}active{% endif %}" href="{{ url_for('index', tab='recommend') }}">おすすめ投稿</a>
 </div>
+{% if not me %}
+<div class="login-banner">
+  🔒 投稿やドーパミンにはログインが必要です
+  <a class="btn small" href="{{ url_for('login') }}">ログイン</a>
+  <a class="link" href="{{ url_for('signup') }}">新規登録</a>
+</div>
+{% endif %}
 {% for p in posts %}
   {{ post_card(p) }}
 {% else %}
