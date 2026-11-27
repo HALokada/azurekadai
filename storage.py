@@ -265,5 +265,10 @@ class LocalStore:
 
 def get_store():
     if CONN_STR:
+        print("[storage] Azure Storage を使います", flush=True)
         return AzureStore(CONN_STR)
+    # Azure 上なのに接続文字列がないときは、ログに目立つ警告を出す
+    if os.environ.get("WEBSITE_SITE_NAME"):
+        print("[storage] 警告: AZURE_STORAGE_CONNECTION_STRING がありません。"
+              "データはデプロイのたびに消えます！", flush=True)
     return LocalStore(os.path.join(os.path.dirname(os.path.abspath(__file__)), "local_data"))

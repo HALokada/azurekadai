@@ -55,6 +55,9 @@ def current_user():
 def login_required(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
+        if current_user() and not store.get_user(current_user()):
+            # ログイン情報はあるのにユーザーが見つからない（データが消えたときなど）→ ログアウト扱い
+            session.clear()
         if not current_user():
             if request.is_json or request.path.startswith("/api/"):
                 return jsonify(error="login required"), 401
@@ -89,6 +92,9 @@ def decorate(posts):
 def inject_user():
     me = current_user()
     user = store.get_user(me) if me else None
+    if me and not user:
+        session.clear()
+        me = None
     return {
         "me": me,
         "my_frame": (user or {}).get("equipped_frame", ""),
