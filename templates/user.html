@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_post.html" import post_card %}
+{% block title %}@{{ name }}｜激熱ドパガキ掲示板{% endblock %}
+{% block content %}
+<section class="profile">
+  <div class="avatar big">{{ name[0]|upper }}</div>
+  <div>
+    <h1>@{{ name }}</h1>
+    <p class="stats">🧠 もらったドーパミン <b>{{ total }}</b> ・ フォロワー <b>{{ followers }}</b></p>
+  </div>
+  {% if me %}
+  <form method="post" action="{{ url_for('toggle_follow', name=name) }}">
+    <button class="btn {% if is_following %}ghost{% endif %}">{% if is_following %}フォロー中{% else %}フォローする{% endif %}</button>
+  </form>
+  {% endif %}
+</section>
+{% for p in posts %}{{ post_card(p) }}{% else %}<p class="empty">まだ投稿がないよ</p>{% endfor %}
+{% endblock %}

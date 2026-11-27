@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="auth" method="post">
+  <h1>{% if mode == 'signup' %}新規登録{% else %}ログイン{% endif %}</h1>
+  <input name="name" placeholder="ユーザー名（半角英数字 3〜20 文字）" required autocomplete="username">
+  <input name="password" type="password" placeholder="パスワード（6 文字以上）" required
+         autocomplete="{% if mode == 'signup' %}new-password{% else %}current-password{% endif %}">
+  <button class="btn">{% if mode == 'signup' %}登録する{% else %}ログイン{% endif %}</button>
+  {% if mode == 'signup' %}
+    <p>アカウントがある人は <a href="{{ url_for('login') }}">ログイン</a></p>
+  {% else %}
+    <p>はじめての人は <a href="{{ url_for('signup') }}">新規登録</a></p>
+  {% endif %}
+</form>
+{% endblock %}

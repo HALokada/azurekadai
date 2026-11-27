@@ -1,0 +1,28 @@
+{% macro post_card(p, can_delete=False) %}
+<article class="post">
+  <header>
+    <a class="avatar" href="{{ url_for('user_page', name=p.author) }}">{{ p.author[0]|upper }}</a>
+    <a class="author" href="{{ url_for('user_page', name=p.author) }}">@{{ p.author }}</a>
+    <time>{{ p.created_at[:16]|replace('T', ' ') }}</time>
+  </header>
+  <h3>{{ p.title }}</h3>
+  {% if p.body %}<p class="body">{{ p.body }}</p>{% endif %}
+  {% if p.media_src %}
+    {% if p.media_kind == 'image' %}<img class="media" src="{{ p.media_src }}" alt="">
+    {% elif p.media_kind == 'video' %}<video class="media" src="{{ p.media_src }}" controls preload="metadata"></video>
+    {% elif p.media_kind == 'audio' %}<audio class="media" src="{{ p.media_src }}" controls preload="none"></audio>
+    {% endif %}
+  {% endif %}
+  <footer>
+    <button class="dopa {% if p.liked %}on{% endif %}" data-id="{{ p.id }}">
+      🧠 <span class="count">{{ p.dopamine }}</span> ドーパミン
+    </button>
+    {% if can_delete %}
+      <form method="post" action="{{ url_for('delete_post', post_id=p.id) }}"
+            onsubmit="return confirm('この投稿を削除する？');">
+        <button class="link danger">削除</button>
+      </form>
+    {% endif %}
+  </footer>
+</article>
+{% endmacro %}

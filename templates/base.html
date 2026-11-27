@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}激熱ドパガキ掲示板{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="layout">
+    <!-- 左のバー（下に自分のアイコン） -->
+    <aside class="side">
+      <a class="logo" href="{{ url_for('index') }}">🔥<span>ドパガキ</span></a>
+      <nav>
+        <a href="{{ url_for('index', tab='recommend') }}">🏠 <span>ホーム</span></a>
+        {% if me %}<a href="{{ url_for('my_page') }}">👤 <span>マイページ</span></a>{% endif %}
+      </nav>
+      <div class="side-bottom">
+        {% if me %}
+          <a class="me-icon" href="{{ url_for('my_page') }}" title="{{ me }}">{{ me[0]|upper }}</a>
+          <form method="post" action="{{ url_for('logout') }}"><button class="link">ログアウト</button></form>
+        {% else %}
+          <a class="btn small" href="{{ url_for('login') }}">ログイン</a>
+        {% endif %}
+      </div>
+    </aside>
+
+    <main class="main">
+      {% with msgs = get_flashed_messages() %}
+        {% for m in msgs %}<div class="flash">{{ m }}</div>{% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  {% if me %}
+  <!-- 投稿ボタン（押すとポップアップ） -->
+  <button class="fab" id="openPost" aria-label="投稿する">＋</button>
+  <div class="modal" id="postModal" hidden>
+    <form class="modal-box" method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
+      <h2>ドーパミン投下 💉</h2>
+      <input name="title" maxlength="100" placeholder="タイトル" required>
+      <textarea name="body" maxlength="2000" rows="4" placeholder="内容"></textarea>
+      <label class="file">📎 画像・動画・音楽
+        <input type="file" name="media" accept="image/*,video/*,audio/*">
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="link" id="closePost">やめる</button>
+        <button class="btn">投稿する</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+  <script>window.LOGGED_IN = {{ 'true' if me else 'false' }};</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

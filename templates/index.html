@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% from "_post.html" import post_card %}
+{% block content %}
+<div class="tabs">
+  <a class="{% if tab == 'following' %}active{% endif %}" href="{{ url_for('index', tab='following') }}">フォロワー投稿</a>
+  <a class="{% if tab == 'recommend' %}active{% endif %}" href="{{ url_for('index', tab='recommend') }}">おすすめ投稿</a>
+</div>
+{% for p in posts %}
+  {{ post_card(p) }}
+{% else %}
+  <p class="empty">
+    {% if tab == 'following' %}フォローしている人の投稿はまだないよ{% else %}まだ投稿がないよ。最初のドーパミンを投下しよう！{% endif %}
+  </p>
+{% endfor %}
+{% endblock %}

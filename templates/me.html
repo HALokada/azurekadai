@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_post.html" import post_card %}
+{% block title %}マイページ｜激熱ドパガキ掲示板{% endblock %}
+{% block content %}
+<section class="profile">
+  <div class="avatar big">{{ me[0]|upper }}</div>
+  <div>
+    <h1>@{{ me }}</h1>
+    <p class="stats">🧠 もらったドーパミン <b>{{ total }}</b> ・ フォロワー <b>{{ followers }}</b> ・ フォロー中 <b>{{ following|length }}</b></p>
+  </div>
+</section>
+
+<div class="tabs" data-switch>
+  <a href="#mine" class="active">自分の投稿</a>
+  <a href="#liked">ドーパミンした投稿</a>
+</div>
+
+<div id="mine" class="pane">
+  {% for p in posts %}{{ post_card(p, can_delete=True) }}{% else %}<p class="empty">まだ投稿してないよ</p>{% endfor %}
+</div>
+<div id="liked" class="pane" hidden>
+  {% for p in liked %}{{ post_card(p) }}{% else %}<p class="empty">まだドーパミンしてないよ</p>{% endfor %}
+</div>
+{% endblock %}
