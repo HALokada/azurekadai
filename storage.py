@@ -61,6 +61,9 @@ class AzureStore:
             "password_hash": password_hash, "created_at": now_iso(),
         })
 
+    def update_user(self, name, fields):
+        self.users.update_entity({"PartitionKey": "user", "RowKey": name, **fields}, mode="merge")
+
     # --- 投稿 ---
     def add_post(self, post):
         self.posts.create_entity({"PartitionKey": "post", **post})
@@ -181,6 +184,11 @@ class LocalStore:
             if name in self.db["users"]:
                 raise ValueError("exists")
             self.db["users"][name] = {"password_hash": password_hash, "created_at": now_iso()}
+            self._save()
+
+    def update_user(self, name, fields):
+        with self.lock:
+            self.db["users"][name].update(fields)
             self._save()
 
     def add_post(self, post):

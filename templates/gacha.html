@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}ドーパミンガチャ｜激熱ドパガキ掲示板{% endblock %}
+{% block content %}
+<section class="gacha">
+  <h1>🎰 ドーパミンガチャ</h1>
+  <p class="sub">1 日 1 回引けるよ。アイコンの枠やドーパミンボタンの色が当たる！</p>
+
+  <div class="machine" id="machine">
+    <div class="capsule" id="capsule">💊</div>
+  </div>
+  <button class="btn big" id="drawBtn" {% if not gacha_ready %}disabled{% endif %}>
+    {% if gacha_ready %}ガチャを引く！{% else %}今日はもう引いたよ（また明日）{% endif %}
+  </button>
+
+  <details class="odds">
+    <summary>出る確率</summary>
+    <ul>
+      {% for r, w in rarities %}<li><span class="rar rar-{{ r }}">{{ r }}</span> {{ w }}%</li>{% endfor %}
+    </ul>
+  </details>
+</section>
+
+<h2 class="section-title">コレクション</h2>
+<div class="collection">
+  {% for item in items %}
+  <div class="item {% if not item.owned %}locked{% endif %}">
+    <span class="rar rar-{{ item.rarity }}">{{ item.rarity }}</span>
+    <div class="preview">
+      {% if item.owned %}
+        {% if item.kind == 'frame' %}
+          <span class="avatar big {{ item.id }}">{{ me[0]|upper }}</span>
+        {% else %}
+          <span class="pv {{ item.id }}"><span class="dopa on">🧠 99 ドーパミン</span></span>
+        {% endif %}
+      {% else %}
+        <span class="mystery">？</span>
+      {% endif %}
+    </div>
+    <div class="item-name">{{ item.name if item.owned else '？？？' }}</div>
+    <div class="item-kind">{{ 'アイコン枠' if item.kind == 'frame' else 'ボタン' }}</div>
+    {% if item.owned %}
+    <form method="post" action="{{ url_for('gacha_equip') }}">
+      <input type="hidden" name="kind" value="{{ item.kind }}">
+      {% if item.id in equipped %}
+        <input type="hidden" name="item" value="">
+        <button class="btn small ghost">装備中（外す）</button>
+      {% else %}
+        <input type="hidden" name="item" value="{{ item.id }}">
+        <button class="btn small">装備する</button>
+      {% endif %}
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- 当たりの発表 -->
+<div class="modal" id="resultModal" hidden>
+  <div class="modal-box notice result" id="resultBox">
+    <div class="rar big-rar" id="resultRarity"></div>
+    <div class="preview" id="resultPreview"></div>
+    <h2 id="resultName"></h2>
+    <p id="resultNote"></p>
+    <a class="btn" href="{{ url_for('gacha_page') }}">コレクションを見る</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.ME_INITIAL = {{ (me[0]|upper)|tojson }};</script>
+<script src="{{ url_for('static', filename='gacha.js') }}"></script>
+{% endblock %}

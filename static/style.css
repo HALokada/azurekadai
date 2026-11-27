@@ -149,6 +149,106 @@ textarea { resize: vertical; }
 .notice .btn { width: 100%; text-align: center; }
 .notice-icon { font-size: 44px; }
 
+/* ===== 紙吹雪・投稿完了 ===== */
+.confetti { position: fixed; top: -40px; z-index: 120; pointer-events: none; font-size: 24px;
+  animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+.posted-banner { position: fixed; left: 50%; top: 40%; z-index: 121; pointer-events: none;
+  font-size: clamp(24px, 5vw, 48px); font-weight: 900; color: #fff; white-space: nowrap;
+  text-shadow: 0 0 20px var(--hot), 0 0 40px var(--hot2);
+  animation: banner 2.6s ease-out forwards; }
+@keyframes banner {
+  0% { transform: translate(-50%, -50%) scale(.2); opacity: 0; }
+  15% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  25%, 80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -80%) scale(1); opacity: 0; } }
+
+/* ===== メニューの赤丸（ガチャが引ける） ===== */
+.gacha-link { position: relative; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #ff3b3b;
+  margin-left: 6px; vertical-align: middle; box-shadow: 0 0 8px #ff3b3b; animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+
+/* ===== アイコンの枠（ガチャの景品） ===== */
+.frame_silver  { box-shadow: 0 0 0 3px #d9dde6; }
+.frame_neon    { box-shadow: 0 0 0 3px #2ee0e0, 0 0 14px #2ee0e0; }
+.frame_fire    { box-shadow: 0 0 0 3px #ff5a1f, 0 0 16px #ff9a2e, 0 0 28px #ff2e2e; animation: fire 1s infinite alternate; }
+@keyframes fire { to { box-shadow: 0 0 0 3px #ffb800, 0 0 22px #ff5a1f, 0 0 36px #ff2e2e; } }
+/* 虹・銀河の枠：枠の部分だけ色が回る */
+@property --ring { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.frame_rainbow, .frame_galaxy { border: 3px solid transparent; animation: ring 2s linear infinite; }
+.frame_rainbow { background:
+  linear-gradient(135deg, var(--hot), var(--hot2)) padding-box,
+  conic-gradient(from var(--ring), #ff2e2e, #ffe62e, #3ee05a, #2ee0e0, #2e6bff, #b02eff, #ff2e2e) border-box; }
+.frame_galaxy { border-width: 4px; box-shadow: 0 0 24px #8a5cff, 0 0 48px #00e5ff; background:
+  radial-gradient(circle at 30% 30%, #6a00ff, #0b0033) padding-box,
+  conic-gradient(from var(--ring), #0b0033, #6a00ff, #00e5ff, #ffffff, #ff00d4, #0b0033) border-box; }
+@keyframes ring { to { --ring: 360deg; } }
+
+/* ===== ドーパミンボタンの色（ガチャの景品） ===== */
+/* body.〜 は自分が装備した色、.pv.〜 はコレクションの見本（見本のほうを優先） */
+body.button_ice .dopa.on, .pv.button_ice .dopa.on {
+  background: linear-gradient(90deg, #6fd3ff, #c9f3ff); color: #06304a; box-shadow: 0 0 18px rgba(111, 211, 255, .6); animation: none; text-shadow: none; }
+body.button_toxic .dopa.on, .pv.button_toxic .dopa.on {
+  background: linear-gradient(90deg, #39ff14, #b4ff00); color: #0d2a00; box-shadow: 0 0 18px rgba(57, 255, 20, .6); animation: none; text-shadow: none; }
+body.button_gold .dopa.on, .pv.button_gold .dopa.on {
+  background: linear-gradient(90deg, #b8860b, #ffd700, #fff6b0, #ffd700); color: #3a2a00; box-shadow: 0 0 20px rgba(255, 215, 0, .7); animation: none; text-shadow: none; }
+body.button_rainbow .dopa.on, .pv.button_rainbow .dopa.on { background: linear-gradient(90deg, #ff2e2e, #ffe62e, #3ee05a, #2ee0e0, #2e6bff, #b02eff, #ff2e2e);
+  background-size: 300% 100%; animation: slide 2s linear infinite; color: #fff; text-shadow: 0 1px 2px #000; }
+@keyframes slide { to { background-position: 300% 0; } }
+
+/* ===== ランキング ===== */
+.ranked { position: relative; }
+.ranked > .rank { position: absolute; left: 6px; top: 14px; font-weight: 900; font-size: 15px; color: var(--sub); }
+.ranked .post { padding-left: 52px; }
+.ranked.rank-1 > .rank, .ranked.rank-2 > .rank, .ranked.rank-3 > .rank { font-size: 28px; top: 8px; }
+.ranked.rank-1 .post { background: linear-gradient(90deg, rgba(255, 215, 0, .12), transparent); }
+.king-row { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--line); text-decoration: none; }
+.king-row:hover { background: var(--panel); }
+.king-row .rank { width: 36px; text-align: center; font-weight: 900; font-size: 18px; color: var(--sub); }
+.king-row.rank-1 .rank, .king-row.rank-2 .rank, .king-row.rank-3 .rank { font-size: 28px; }
+.king-row.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, .15), transparent); }
+.king-total { margin-left: auto; font-weight: 800; }
+
+/* ===== ガチャ ===== */
+.gacha { text-align: center; padding: 28px 20px; border-bottom: 1px solid var(--line); }
+.gacha h1 { margin: 0 0 6px; }
+.gacha .sub { color: var(--sub); margin: 0 0 20px; }
+.machine { width: 180px; height: 180px; margin: 0 auto 20px; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #3a2c50, #120d1a); border: 4px solid var(--hot);
+  box-shadow: 0 0 30px rgba(255, 46, 136, .4), inset 0 0 30px rgba(0, 0, 0, .6); }
+.capsule { font-size: 80px; transition: transform .3s; }
+.capsule.shake { animation: shake .12s infinite; }
+@keyframes shake { 0% { transform: rotate(-14deg) scale(1.05); } 50% { transform: rotate(14deg) scale(.95); } 100% { transform: rotate(-14deg) scale(1.05); } }
+.capsule.open { transform: scale(1.4); filter: drop-shadow(0 0 20px var(--hot2)); }
+.btn.big { font-size: 20px; padding: 14px 40px; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.odds { margin-top: 18px; color: var(--sub); }
+.odds ul { list-style: none; padding: 0; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.section-title { margin: 20px 20px 0; font-size: 18px; }
+.collection { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 16px 20px; }
+.item { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 10px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.item.locked { opacity: .5; }
+.item .rar { position: absolute; top: 8px; left: 8px; }
+.item .preview { height: 84px; display: grid; place-items: center; }
+.item-name { font-weight: 700; }
+.item-kind { font-size: 12px; color: var(--sub); }
+.mystery { font-size: 42px; color: var(--sub); }
+.rar { display: inline-block; font-size: 11px; font-weight: 900; padding: 2px 7px; border-radius: 6px; color: #fff; }
+.rar-N { background: #6b6f7a; }
+.rar-R { background: #2e6bff; }
+.rar-SR { background: #b02eff; }
+.rar-SSR { background: linear-gradient(90deg, #ff2e2e, #ffe62e, #3ee05a, #2ee0e0, #b02eff); color: #000; }
+.rar-UR { background: linear-gradient(90deg, #0b0033, #6a00ff, #00e5ff, #ff00d4); box-shadow: 0 0 10px #00e5ff; }
+.big-rar { font-size: 28px; padding: 6px 18px; border-radius: 10px; }
+.result .preview { min-height: 90px; display: grid; place-items: center; }
+.result-SSR, .result-UR { border: 2px solid #ffe62e; box-shadow: 0 0 40px rgba(255, 230, 46, .6); }
+body.jackpot::after { content: ""; position: fixed; inset: 0; z-index: 49; pointer-events: none;
+  background: conic-gradient(from 0deg, #ff2e2e55, #ffe62e55, #3ee05a55, #2ee0e055, #2e6bff55, #b02eff55, #ff2e2e55);
+  animation: jackpot 1.5s ease-out forwards; }
+@keyframes jackpot { 0% { opacity: 1; } 100% { opacity: 0; } }
+
 /* スマホ */
 @media (max-width: 700px) {
   .side { width: 64px; padding: 16px 8px; align-items: center; }

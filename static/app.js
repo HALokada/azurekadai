@@ -98,6 +98,32 @@ function burst(btn) {
   navigator.vibrate?.(40);
 }
 
+// ===== 紙吹雪（投稿したとき・ガチャで使う） =====
+function rain(count, chars) {
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement("span");
+    s.className = "confetti";
+    s.textContent = chars[i % chars.length];
+    s.style.left = Math.random() * 100 + "vw";
+    s.style.animationDelay = Math.random() * 0.8 + "s";
+    s.style.animationDuration = 1.6 + Math.random() * 1.4 + "s";
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 4000);
+  }
+}
+
+// ===== 投稿した直後の演出 =====
+if (document.body.dataset.justPosted) {
+  rain(50, ["🎉", "💉", "🧠", "✨", "🔥", "🎊"]);
+  const banner = document.createElement("div");
+  banner.className = "posted-banner";
+  banner.textContent = "ドーパミン投下完了💉";
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 2600);
+  // ページを開いた直後はブラウザが音を止めることがあるので、鳴らなくても気にしない
+  try { playDopamine(7); } catch (e) {}
+}
+
 // ===== ドーパミンボタン =====
 let combo = 0, comboTimer;
 document.addEventListener("click", async (e) => {

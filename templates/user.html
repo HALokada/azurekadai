@@ -3,7 +3,7 @@
 {% block title %}@{{ name }}｜激熱ドパガキ掲示板{% endblock %}
 {% block content %}
 <section class="profile">
-  <div class="avatar big">{{ name[0]|upper }}</div>
+  <div class="avatar big {{ frame }}">{{ name[0]|upper }}</div>
   <div>
     <h1>@{{ name }}</h1>
     <p class="stats">🧠 もらったドーパミン <b>{{ total }}</b> ・ フォロワー <b>{{ followers }}</b></p>

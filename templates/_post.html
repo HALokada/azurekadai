@@ -1,9 +1,9 @@
 {% macro post_card(p, can_delete=False) %}
 <article class="post">
   <header>
-    <a class="avatar" href="{{ url_for('user_page', name=p.author) }}">{{ p.author[0]|upper }}</a>
+    <a class="avatar {{ p.frame }}" href="{{ url_for('user_page', name=p.author) }}">{{ p.author[0]|upper }}</a>
     <a class="author" href="{{ url_for('user_page', name=p.author) }}">@{{ p.author }}</a>
-    <time>{{ p.created_at[:16]|replace('T', ' ') }}</time>
+    <time>{{ p.created_at|jst }}</time>
   </header>
   <h3>{{ p.title }}</h3>
   {% if p.body %}<p class="body">{{ p.body }}</p>{% endif %}

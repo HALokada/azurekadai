@@ -3,7 +3,7 @@
 {% block title %}マイページ｜激熱ドパガキ掲示板{% endblock %}
 {% block content %}
 <section class="profile">
-  <div class="avatar big">{{ me[0]|upper }}</div>
+  <div class="avatar big {{ my_frame }}">{{ me[0]|upper }}</div>
   <div>
     <h1>@{{ me }}</h1>
     <p class="stats">🧠 もらったドーパミン <b>{{ total }}</b> ・ フォロワー <b>{{ followers }}</b> ・ フォロー中 <b>{{ following|length }}</b></p>

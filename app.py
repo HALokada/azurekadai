@@ -1,13 +1,16 @@
 """激熱ドパガキ掲示板（Flask）"""
+import json
 import os
 import re
 import uuid
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 from flask import (Flask, abort, flash, jsonify, redirect, render_template,
                    request, send_from_directory, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import gacha
 from storage import LocalStore, get_store, new_post_key, now_iso
 
 app = Flask(__name__)
@@ -16,6 +19,25 @@ app.secret_key = os.environ.get("SECRET_KEY", "local-dev-only-change-me")
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # アップロードは 50MB まで
 
 store = get_store()
+
+JST = timezone(timedelta(hours=9))
+
+
+def to_jst(iso):
+    return datetime.fromisoformat(iso).astimezone(JST)
+
+
+def today_jst():
+    return datetime.now(JST).strftime("%Y-%m-%d")
+
+
+@app.template_filter("jst")
+def jst_filter(iso):
+    """投稿時間を日本時間で表示する。"""
+    try:
+        return to_jst(iso).strftime("%Y-%m-%d %H:%M")
+    except (TypeError, ValueError):
+        return iso
 
 NAME_RE = re.compile(r"^[A-Za-z0-9_]{3,20}$")
 POST_ID_RE = re.compile(r"^[0-9]{13}-[0-9a-f]{8}$")
@@ -50,7 +72,12 @@ def decorate(posts):
     """テンプレートで使いやすい形にする（ファイルの URL、自分がいいね済みか）。"""
     me = current_user()
     liked = set(store.liked_post_ids(me)) if me else set()
+    frames = {}
+    for a in {p["author"] for p in posts}:
+        u = store.get_user(a)
+        frames[a] = (u or {}).get("equipped_frame", "")
     for p in posts:
+        p["frame"] = frames.get(p["author"], "")
         p["id"] = p["RowKey"]
         p["media_src"] = store.media_url(p["media_blob"]) if p.get("media_blob") else None
         p["liked"] = p["id"] in liked
@@ -60,7 +87,16 @@ def decorate(posts):
 
 @app.context_processor
 def inject_user():
-    return {"me": current_user()}
+    me = current_user()
+    user = store.get_user(me) if me else None
+    return {
+        "me": me,
+        "my_frame": (user or {}).get("equipped_frame", ""),
+        "my_button": (user or {}).get("equipped_button", ""),
+        "gacha_ready": bool(user) and user.get("last_gacha") != today_jst(),
+        # 投稿した直後だけ演出を出す
+        "just_posted": session.pop("just_posted", False),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +142,7 @@ def user_page(name):
     is_following = bool(current_user()) and name in store.following(current_user())
     return render_template(
         "user.html", name=name, posts=decorate(posts), is_following=is_following,
+        frame=store.get_user(name).get("equipped_frame", ""),
         followers=store.follower_count(name),
         total=sum(int(p.get("dopamine", 0)) for p in posts),
     )
@@ -181,6 +218,7 @@ def create_post():
         post["media_kind"] = kind
 
     store.add_post(post)
+    session["just_posted"] = True
     return redirect(url_for("index", tab="recommend"))
 
 
@@ -231,6 +269,89 @@ def toggle_follow(name):
     else:
         store.follow(current_user(), name)
     return redirect(url_for("user_page", name=name))
+
+
+# ---------------------------------------------------------------------------
+# ランキング
+# ---------------------------------------------------------------------------
+@app.route("/ranking")
+def ranking():
+    tab = request.args.get("tab", "today")
+    posts = store.list_posts(limit=1000)
+    kings = []
+    if tab == "king":
+        totals = {}
+        for p in posts:
+            totals[p["author"]] = totals.get(p["author"], 0) + int(p.get("dopamine", 0))
+        frames = {a: (store.get_user(a) or {}).get("equipped_frame", "") for a in totals}
+        kings = sorted(
+            ({"name": a, "total": t, "frame": frames[a]} for a, t in totals.items() if t > 0),
+            key=lambda k: -k["total"],
+        )[:20]
+        posts = []
+    else:
+        if tab == "today":
+            today = today_jst()
+            posts = [p for p in posts if to_jst(p["created_at"]).strftime("%Y-%m-%d") == today]
+        else:
+            tab = "all"
+        posts = [p for p in posts if int(p.get("dopamine", 0)) > 0]
+        posts = decorate(sorted(posts, key=lambda p: -int(p.get("dopamine", 0)))[:20])
+    return render_template("ranking.html", tab=tab, posts=posts, kings=kings)
+
+
+# ---------------------------------------------------------------------------
+# ガチャ（1 日 1 回）
+# ---------------------------------------------------------------------------
+def owned_items(user):
+    try:
+        return json.loads(user.get("items") or "[]")
+    except ValueError:
+        return []
+
+
+@app.route("/gacha")
+@login_required
+def gacha_page():
+    user = store.get_user(current_user())
+    owned = owned_items(user)
+    items = [dict(item, id=i, owned=i in owned) for i, item in gacha.ITEMS.items()]
+    return render_template(
+        "gacha.html", items=items, rarities=gacha.RARITIES,
+        equipped={user.get("equipped_frame", ""), user.get("equipped_button", "")},
+    )
+
+
+@app.route("/api/gacha", methods=["POST"])
+@login_required
+def gacha_draw():
+    me = current_user()
+    user = store.get_user(me)
+    if user.get("last_gacha") == today_jst():
+        return jsonify(error="今日はもう引いたよ！また明日！"), 429
+    item_id = gacha.draw()
+    owned = owned_items(user)
+    duplicate = item_id in owned
+    if not duplicate:
+        owned.append(item_id)
+    store.update_user(me, {"last_gacha": today_jst(), "items": json.dumps(owned)})
+    return jsonify(id=item_id, duplicate=duplicate, **gacha.ITEMS[item_id])
+
+
+@app.route("/gacha/equip", methods=["POST"])
+@login_required
+def gacha_equip():
+    me = current_user()
+    item_id = request.form.get("item", "")
+    kind = request.form.get("kind", "")
+    if kind not in ("frame", "button"):
+        abort(400)
+    if item_id:  # 空なら外す
+        item = gacha.ITEMS.get(item_id)
+        if not item or item["kind"] != kind or item_id not in owned_items(store.get_user(me)):
+            abort(400)
+    store.update_user(me, {f"equipped_{kind}": item_id})
+    return redirect(url_for("gacha_page"))
 
 
 # パソコンで試すときだけ使う（Azure では Blob Storage の URL を使う）

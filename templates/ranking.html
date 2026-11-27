@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_post.html" import post_card %}
+{% block title %}ランキング｜激熱ドパガキ掲示板{% endblock %}
+{% block content %}
+<div class="tabs">
+  <a class="{% if tab == 'today' %}active{% endif %}" href="{{ url_for('ranking', tab='today') }}">今日の投稿</a>
+  <a class="{% if tab == 'all' %}active{% endif %}" href="{{ url_for('ranking', tab='all') }}">全期間の投稿</a>
+  <a class="{% if tab == 'king' %}active{% endif %}" href="{{ url_for('ranking', tab='king') }}">ドーパミン王</a>
+</div>
+
+{% set medals = ['👑', '🥈', '🥉'] %}
+
+{% if tab == 'king' %}
+  {% for k in kings %}
+  <a class="king-row rank-{{ loop.index }}" href="{{ url_for('user_page', name=k.name) }}">
+    <span class="rank">{{ medals[loop.index0] if loop.index <= 3 else loop.index }}</span>
+    <span class="avatar {{ k.frame }}">{{ k.name[0]|upper }}</span>
+    <span class="author">@{{ k.name }}</span>
+    <span class="king-total">🧠 {{ k.total }}</span>
+  </a>
+  {% else %}
+  <p class="empty">まだドーパミンをもらった人がいないよ</p>
+  {% endfor %}
+{% else %}
+  {% for p in posts %}
+  <div class="ranked rank-{{ loop.index }}">
+    <div class="rank">{{ medals[loop.index0] if loop.index <= 3 else loop.index ~ '位' }}</div>
+    {{ post_card(p) }}
+  </div>
+  {% else %}
+  <p class="empty">{% if tab == 'today' %}今日はまだドーパミンが出た投稿がないよ{% else %}まだドーパミンが出た投稿がないよ{% endif %}</p>
+  {% endfor %}
+{% endif %}
+{% endblock %}
